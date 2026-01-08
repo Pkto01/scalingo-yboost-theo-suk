@@ -7,17 +7,17 @@ import (
 )
 
 func main() {
-	// Récupération du port donné par Scalingo
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" // fallback local
+// Routes
+	http.HandleFunc("/", homeHandler)
+
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	port := "3000"
+	if os.Getenv("PORT") != "" {
+		port = os.Getenv("PORT")
 	}
 
-	// Sert les fichiers du dossier "static"
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/", fs)
-
-	log.Println("Server started on port", port)
+	log.Println("Serveur démarré sur http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+
 }
-	
