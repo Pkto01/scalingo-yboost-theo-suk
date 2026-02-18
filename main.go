@@ -133,6 +133,29 @@ func (app *Env) addTodoHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func (app *Env) doneTodoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		app.errorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// On récupère l'ID de la tâche à modifier
+	id := r.FormValue("id")
+	
+	// On met à jour la tâche dans la BDD (on passe completed à true)
+	// On utilise "NOT completed" pour pouvoir cocher/décocher avec le même bouton
+	query := "UPDATE todos SET completed = NOT completed WHERE id = ?"
+	_, err := app.db.Exec(query, id)
+	if err != nil {
+		log.Println("Erreur lors de l'update :", err)
+		app.errorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+
+	// Redirection vers l'accueil pour voir le changement
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 
@@ -173,6 +196,7 @@ func main() {
 	// On utilise app.homeHandler au lieu de homeHandler
 	http.HandleFunc("/", app.homeHandler)
 	http.HandleFunc("/add", app.addTodoHandler)
+	http.HandleFunc("/done", app.doneTodoHandler)
 
 	// Fichiers statiques
 	fs := http.FileServer(http.Dir("static"))
