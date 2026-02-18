@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"github.com/xo/dburl"
+
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/xo/dburl"
 )
 
 // 1. On utilise la structure Env pour "transporter" la connexion BDD
@@ -16,9 +17,15 @@ type Env struct {
 	db *sql.DB
 }
 
+type Todo struct {
+	ID        int
+	Title     string
+	Completed bool
+}
+
 func connectDB() (*sql.DB, error) {
 	rawURL := os.Getenv("SCALINGO_MYSQL_URL")
-	
+
 	if rawURL == "" {
 		// En local
 		rawURL = "mysql://root:password@127.0.0.1:3306/ma_bdd"
@@ -65,29 +72,43 @@ func (app *Env) initDB() error {
 	return nil
 }
 
-// 2. homeHandler devient une MÉTHODE de Env
 func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.errorHandler(w, r, http.StatusNotFound)
 		return
 	}
 
-	// Exemple d'utilisation de la BDD (si besoin) :
-	// app.db.Query("SELECT ...")
-
-	tmpl, err := template.ParseFiles("static/index.html")
+	// 1. Chercher les tâches dans la BDD
+	rows, err := app.db.Query("SELECT id, title, completed FROM todos ORDER BY id DESC")
 	if err != nil {
-		log.Println("Erreur template index.html:", err)
-		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		log.Println(err)
+		http.Error(w, "Erreur BDD", 500)
 		return
 	}
-	tmpl.Execute(w, nil)
+	defer rows.Close()
+
+	var todos []Todo
+	for rows.Next() {
+		var t Todo
+		rows.Scan(&t.ID, &t.Title, &t.Completed)
+		todos = append(todos, t)
+	}
+
+	// 2. Préparer les données pour le template
+	data := struct {
+		Todos []Todo
+	}{
+		Todos: todos,
+	}
+
+	// 3. Envoyer au HTML
+	tmpl, _ := template.ParseFiles("static/index.html")
+	tmpl.Execute(w, data)
 }
 
-// 3. errorHandler devient aussi une méthode de Env
 func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
-	tmpl, err := template.ParseFiles("static/error.html") 
+	tmpl, err := template.ParseFiles("static/error.html")
 	if err != nil {
 		log.Println("Erreur template error.html:", err)
 		http.Error(w, http.StatusText(status), status)
