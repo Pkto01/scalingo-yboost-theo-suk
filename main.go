@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
+	"github.com/xo/dburl"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -18,33 +18,23 @@ type Env struct {
 }
 
 func connectDB() (*sql.DB, error) {
-	mysqlURL := os.Getenv("SCALINGO_MYSQL_URL")
-	var dsn string
+    url := os.Getenv("SCALINGO_MYSQL_URL")
+    if url == "" {
+        // En local, on utilise une URL au format standard
+        url = "mysql://root:password@127.0.0.1:3306/ma_bdd"
+    }
 
-	if mysqlURL == "" {
-		dsn = "root:password@tcp(127.0.0.1:3306)/ma_bdd"
-	} else {
-		temp := strings.TrimPrefix(mysqlURL, "mysql://")
-		parts := strings.Split(temp, "@")
-		credentials := parts[0]
-		hostAndDb := strings.Split(parts[1], "/")
-		host := hostAndDb[0]
-		dbName := hostAndDb[1]
-		// Ajout de parseTime=true pour les dates et tls=true pour Scalingo
-		dsn = fmt.Sprintf("%s@tcp(%s)/%s?parseTime=true&tls=true", credentials, host, dbName)
-	}
+    // dburl analyse l'URL et s'occupe de la conversion proprement
+    db, err := dburl.Open(url)
+    if err != nil {
+        return nil, err
+    }
 
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
+    if err := db.Ping(); err != nil {
+        return nil, err
+    }
 
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-
-	fmt.Println("Connecté avec succès à MySQL !")
-	return db, nil
+    return db, nil
 }
 
 // 2. homeHandler devient une MÉTHODE de Env
