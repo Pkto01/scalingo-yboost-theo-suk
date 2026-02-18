@@ -93,7 +93,11 @@ button:hover {
 /* ================= */
 
 .todo-list {
-    margin-top: 40px;
+    max-height: 400px;    /* Ajuste cette valeur selon tes besoins */
+    overflow-y: auto;     /* Active le scroll vertical si besoin */
+    overflow-x: hidden;   /* Empêche le scroll horizontal */
+    padding-right: 10px;  /* Espace pour ne pas coller à la barre de scroll */
+    margin-top: 20px;
     list-style: none;
 }
 
@@ -125,6 +129,26 @@ button:hover {
     color: magenta;
     opacity: 0.5;
     text-shadow: 0 0 5px magenta;
+}
+
+/* SCROLLBAR */
+
+.todo-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* BOUTON DONE */
