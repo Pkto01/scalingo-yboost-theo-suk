@@ -1,64 +1,61 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"fmt"
 	"strings"
-	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// 1. On utilise la structure Env pour "transporter" la connexion BDD
 type Env struct {
-    db *sql.DB
+	db *sql.DB
 }
 
 func connectDB() (*sql.DB, error) {
-    mysqlURL := os.Getenv("SCALINGO_MYSQL_URL")
-    
-    var dsn string
-    if mysqlURL == "" {
-        // En local
-        dsn = "root:password@tcp(127.0.0.1:3306)/ma_bdd"
-    } else {
-        // Transformation de l'URL Scalingo pour le driver Go
-        // mysql://user:pass@host:port/db -> user:pass@tcp(host:port)/db
-        temp := strings.TrimPrefix(mysqlURL, "mysql://")
-        parts := strings.Split(temp, "@")
-        credentials := parts[0]
-        hostAndDb := strings.Split(parts[1], "/")
-        host := hostAndDb[0]
-        dbName := hostAndDb[1]
-        
-        // On ajoute ?parseTime=true pour gérer les dates correctement en Go
-        // On ajoute ?tls=true car Scalingo l'exige souvent en prod
-        dsn = fmt.Sprintf("%s@tcp(%s)/%s?parseTime=true&tls=true", credentials, host, dbName)
-    }
+	mysqlURL := os.Getenv("SCALINGO_MYSQL_URL")
+	var dsn string
 
-    // 1. Ouvrir la connexion (ne pas utiliser defer ici !)
-    db, err := sql.Open("mysql", dsn)
-    if err != nil {
-        return nil, err
-    }
+	if mysqlURL == "" {
+		dsn = "root:password@tcp(127.0.0.1:3306)/ma_bdd"
+	} else {
+		temp := strings.TrimPrefix(mysqlURL, "mysql://")
+		parts := strings.Split(temp, "@")
+		credentials := parts[0]
+		hostAndDb := strings.Split(parts[1], "/")
+		host := hostAndDb[0]
+		dbName := hostAndDb[1]
+		// Ajout de parseTime=true pour les dates et tls=true pour Scalingo
+		dsn = fmt.Sprintf("%s@tcp(%s)/%s?parseTime=true&tls=true", credentials, host, dbName)
+	}
 
-    // 2. Vérifier la connexion
-    err = db.Ping()
-    if err != nil {
-        return nil, err
-    }
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
 
-    fmt.Println("Connecté avec succès à MySQL !")
-    return db, nil
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Connecté avec succès à MySQL !")
+	return db, nil
 }
 
-// Handle homepage -> index.html
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+// 2. homeHandler devient une MÉTHODE de Env
+func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		errorHandler(w, r, http.StatusNotFound)
+		app.errorHandler(w, r, http.StatusNotFound)
 		return
 	}
+
+	// Exemple d'utilisation de la BDD (si besoin) :
+	// app.db.Query("SELECT ...")
 
 	tmpl, err := template.ParseFiles("static/index.html")
 	if err != nil {
@@ -66,19 +63,14 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 		return
 	}
-
-	err = tmpl.Execute(w, nil)
-	if err != nil {
-		log.Println("Erreur exécution template index.html:", err)
-	}
-
-	
+	tmpl.Execute(w, nil)
 }
 
-// Handle error
-func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+// 3. errorHandler devient aussi une méthode de Env
+func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
-	tmpl, err := template.ParseFiles("template/error.html")
+	// Attention : vérifie bien si ton dossier s'appelle "static" ou "template"
+	tmpl, err := template.ParseFiles("static/error.html") 
 	if err != nil {
 		log.Println("Erreur template error.html:", err)
 		http.Error(w, http.StatusText(status), status)
@@ -92,36 +84,33 @@ func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 		Status:  status,
 		Message: http.StatusText(status),
 	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		log.Println("Erreur exécution template error.html:", err)
-	}
+	tmpl.Execute(w, data)
 }
 
 func main() {
-	// Routes
-	http.HandleFunc("/", homeHandler)
-
-	// Database connection
+	// A. Connexion BDD
 	db, err := connectDB()
-    if err != nil {
-        log.Fatal("Impossible de se connecter à la BDD :", err)
-    }
+	if err != nil {
+		log.Fatal("Impossible de se connecter à la BDD :", err)
+	}
 	defer db.Close()
 
+	// B. On initialise notre structure avec la connexion
+	app := &Env{db: db}
+
+	// C. On utilise app.homeHandler au lieu de homeHandler
+	http.HandleFunc("/", app.homeHandler)
+
+	// Fichiers statiques
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
-	// Serve direct requests to /style.css (allows index.html to reference "style.css")
 	http.Handle("/style.css", fs)
 
-	port := "3000"
-	if os.Getenv("PORT") != "" {
-		port = os.Getenv("PORT")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
 	}
 
 	log.Println("Serveur démarré sur http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-
 }
