@@ -10,20 +10,16 @@
     <div class="container">
         <h1 data-text="Ma Todo List"><span>Ma Todo List</span></h1>
         <p>Propulsé par Go & MySQL sur Scalingo 🐹</p>
-
-        <!-- Formulaire pour ajouter une tâche -->
+        
         <form action="/add" method="POST" class="todo-form">
             <input type="text" name="title" placeholder="Qu'y a-t-il à faire ?" required>
             <button type="submit">Ajouter</button>
         </form>
 
-        <!-- Liste des tâches -->
         <ul class="todo-list">
             {{ range .Todos }}
             <li class="{{ if .Completed }}completed{{ end }}">
                 <span>{{ .Title }}</span>
-                <div class="actions">
-                    <!-- On utilise des formulaires simples pour les actions -->
                     <form action="/done" method="POST" style="display:inline;">
                         <input type="hidden" name="id" value="{{ .ID }}">
                         <button type="submit" class="btn-done">✓</button>
@@ -57,7 +53,7 @@
 
             const titleInput = document.createElement("input");
             titleInput.type = "hidden";
-            titleInput.name = "new_title"; // <-- CHANGÉ ICI (au lieu de "title")
+            titleInput.name = "new_title";
             titleInput.value = newTitle.trim();
             form.appendChild(titleInput);
 

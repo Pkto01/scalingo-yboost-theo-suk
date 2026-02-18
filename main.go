@@ -13,7 +13,6 @@ import (
 	"github.com/xo/dburl"
 )
 
-// 1. On utilise la structure Env pour "transporter" la connexion BDD
 type Env struct {
 	db *sql.DB
 }
@@ -31,16 +30,12 @@ func connectDB() (*sql.DB, error) {
 		// En local
 		rawURL = "mysql://root:password@127.0.0.1:3306/ma_bdd"
 	} else {
-		// --- FIX SCALINGO ---
-		// On enlève les paramètres existants (comme ?useSSL=true) qui font planter
 		if pos := strings.Index(rawURL, "?"); pos != -1 {
 			rawURL = rawURL[:pos]
 		}
-		// On ajoute les bons paramètres pour Go
 		rawURL += "?tls=true&parseTime=true"
 	}
 
-	// dburl va maintenant parser une URL propre
 	db, err := dburl.Open(rawURL)
 	if err != nil {
 		return nil, err
@@ -79,7 +74,7 @@ func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Chercher les tâches dans la BDD
+	// Chercher les tâches dans la BDD
 	rows, err := app.db.Query("SELECT id, title, completed FROM todos ORDER BY id DESC")
 	if err != nil {
 		log.Println(err)
@@ -95,14 +90,14 @@ func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 		todos = append(todos, t)
 	}
 
-	// 2. Préparer les données pour le template
+	// Préparer les données pour le template
 	data := struct {
 		Todos []Todo
 	}{
 		Todos: todos,
 	}
 
-	// 3. Envoyer au HTML
+	// Envoyer au HTML
 	tmpl, _ := template.ParseFiles("static/index.html")
 	tmpl.Execute(w, data)
 }
@@ -240,7 +235,7 @@ func main() {
 		log.Fatal("Erreur lors de l'initialisation des tables :", err)
 	}
 
-	// On utilise app.homeHandler au lieu de homeHandler
+	// Handlers
 	http.HandleFunc("/", app.homeHandler)
 	http.HandleFunc("/add", app.addTodoHandler)
 	http.HandleFunc("/done", app.doneTodoHandler)
