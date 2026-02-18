@@ -69,29 +69,21 @@ p {
 
 /* BOUTON */
 button {
-
     margin-top: 40px;
     padding: 15px 40px;
-
     border-radius: 999px;
     border: none;
-
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
-
     background: linear-gradient(135deg, cyan, magenta);
     color: black;
-
     transition: 0.3s;
-
     box-shadow: 0 0 20px cyan;
 }
 
 button:hover {
-
     transform: scale(1.1);
-
     box-shadow:
         0 0 40px magenta;
 }
@@ -101,122 +93,120 @@ button:hover {
 /* ================= */
 
 .todo-list {
-
     margin-top: 40px;
     list-style: none;
 }
 
 .todo-list li {
-
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     padding: 12px 20px;
     margin-top: 10px;
-
     border-radius: 12px;
-
     background: rgba(255,255,255,0.05);
-
     box-shadow:
         0 0 10px rgba(0,255,255,0.15);
-
     transition: 0.3s;
 }
 
 /* TEXTE NORMAL */
 
 .todo-list li span {
-
     font-size: 1.2rem;
-
     color: cyan;
-
     text-shadow: 0 0 5px cyan;
 }
 
 /* TEXTE COMPLETE */
 
 .todo-list li.completed span {
-
     text-decoration: line-through;
-
     color: magenta;
-
     opacity: 0.5;
-
     text-shadow: 0 0 5px magenta;
 }
 
 /* BOUTON DONE */
 
 .btn-done {
-
     background: transparent;
-
     border: 1px solid cyan;
-
     color: cyan;
-
     border-radius: 8px;
-
     padding: 5px 12px;
-
     cursor: pointer;
-
     transition: 0.3s;
 }
 
 /* DONE ACTIF */
 
 .todo-list li.completed .btn-done {
-
     border-color: magenta;
-
     color: magenta;
-
     box-shadow: 0 0 10px magenta;
 }
 
 /* HOVER */
 
 .btn-done:hover {
-
     box-shadow:
         0 0 15px cyan;
+}
+
+/* BOUTON DELETE NEON */
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid #ff2b2b;
+    color: #ff2b2b;
+    border-radius: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.25s;
+    box-shadow:
+        0 0 5px #ff2b2b,
+        inset 0 0 5px rgba(255,43,43,0.2);
+}
+
+
+/* HOVER */
+
+.btn-delete:hover {
+    color: white;
+    background: #ff2b2b;
+    box-shadow:
+        0 0 5px #ff2b2b,
+        0 0 15px #ff2b2b,
+        0 0 30px #ff2b2b,
+        0 0 60px #ff0000;
+    transform: scale(1.15);
 }
 
 
 /* ANIMATIONS */
 
 @keyframes float {
-
     0%,100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(-15px);
     }
-
 }
 
 @keyframes glitch {
-
     0% {
         clip-path: inset(0 0 90% 0);
         transform: translate(-2px,-2px);
     }
-
     50% {
         clip-path: inset(40% 0 20% 0);
         transform: translate(2px,2px);
     }
-
     100% {
         clip-path: inset(80% 0 5% 0);
         transform: translate(-1px,1px);
     }
-
 }
