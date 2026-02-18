@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"github.com/xo/dburl"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,23 +17,32 @@ type Env struct {
 }
 
 func connectDB() (*sql.DB, error) {
-    url := os.Getenv("SCALINGO_MYSQL_URL")
-    if url == "" {
-        // En local, on utilise une URL au format standard
-        url = "mysql://root:password@127.0.0.1:3306/ma_bdd"
-    }
+	rawURL := os.Getenv("SCALINGO_MYSQL_URL")
+	
+	if rawURL == "" {
+		// En local
+		rawURL = "mysql://root:password@127.0.0.1:3306/ma_bdd"
+	} else {
+		// --- FIX SCALINGO ---
+		// On enlève les paramètres existants (comme ?useSSL=true) qui font planter
+		if pos := strings.Index(rawURL, "?"); pos != -1 {
+			rawURL = rawURL[:pos]
+		}
+		// On ajoute les bons paramètres pour Go
+		rawURL += "?tls=true&parseTime=true"
+	}
 
-    // dburl analyse l'URL et s'occupe de la conversion proprement
-    db, err := dburl.Open(url)
-    if err != nil {
-        return nil, err
-    }
+	// dburl va maintenant parser une URL propre
+	db, err := dburl.Open(rawURL)
+	if err != nil {
+		return nil, err
+	}
 
-    if err := db.Ping(); err != nil {
-        return nil, err
-    }
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
 
-    return db, nil
+	return db, nil
 }
 
 // 2. homeHandler devient une MÉTHODE de Env

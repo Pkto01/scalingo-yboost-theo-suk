@@ -1,4 +1,4 @@
-module go.mod
+module AppWebGo
 
 go 1.25.0
 
