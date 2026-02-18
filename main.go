@@ -2,12 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"github.com/xo/dburl"
 	_ "github.com/go-sql-driver/mysql"
 )
