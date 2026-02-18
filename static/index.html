@@ -28,6 +28,10 @@
                         <input type="hidden" name="id" value="{{ .ID }}">
                         <button type="submit" class="btn-done">✓</button>
                     </form>
+                    <form action="/delete" method="POST" style="display:inline;">
+                        <input type="hidden" name="id" value="{{ .ID }}">
+                        <button type="submit" class="btn-delete">✗</button>
+                    </form>
                 </div>
             </li>
             {{ else }}

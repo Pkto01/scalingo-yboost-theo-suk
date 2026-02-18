@@ -156,6 +156,25 @@ func (app *Env) doneTodoHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func (app *Env) deleteTodoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		app.errorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.FormValue("id")
+
+	query := "DELETE FROM todos WHERE id = ?"
+	_, err := app.db.Exec(query, id)
+	if err != nil {
+		log.Println("Erreur lors de la suppression :", err)
+		app.errorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 
@@ -197,6 +216,7 @@ func main() {
 	http.HandleFunc("/", app.homeHandler)
 	http.HandleFunc("/add", app.addTodoHandler)
 	http.HandleFunc("/done", app.doneTodoHandler)
+	http.HandleFunc("/delete", app.deleteTodoHandler)
 
 	// Fichiers statiques
 	fs := http.FileServer(http.Dir("static"))
