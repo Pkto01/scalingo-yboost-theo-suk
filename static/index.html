@@ -28,6 +28,7 @@
                         <input type="hidden" name="id" value="{{ .ID }}">
                         <button type="submit" class="btn-done">✓</button>
                     </form>
+                    <button type="button" class="btn-rename" onclick="handleRename('{{ .ID }}', '{{ .Title }}')">✎</button>
                     <form action="/delete" method="POST" style="display:inline;">
                         <input type="hidden" name="id" value="{{ .ID }}">
                         <button type="submit" class="btn-delete">✗</button>
@@ -40,4 +41,32 @@
         </ul>
     </div>
 </body>
+<script>
+    function handleRename(id, currentTitle) {
+        const newTitle = prompt("Renommez la tâche :", currentTitle);
+        if (newTitle && newTitle.trim() !== "") {
+            // Créer un formulaire dynamique pour soumettre la nouvelle valeur
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/rename";
+
+            const idInput = document.createElement("input");
+            idInput.type = "hidden";
+            idInput.name = "id";
+            idInput.value = id;
+            form.appendChild(idInput);
+
+            const titleInput = document.createElement("input");
+            titleInput.type = "hidden";
+            titleInput.name = "title";
+            titleInput.value = newTitle.trim();
+            form.appendChild(titleInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+
+
 </html>
