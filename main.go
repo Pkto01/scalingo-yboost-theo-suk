@@ -107,6 +107,32 @@ func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+func (app *Env) addTodoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		app.errorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Récupérer les données du formulaire
+	title := r.FormValue("title")
+	if title == "" {
+		app.errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	// Insérer la nouvelle tâche dans la BDD
+	query := "INSERT INTO todos (title) VALUES (?)"
+	_, err := app.db.Exec(query, title)
+	if err != nil {
+		log.Println(err)
+		app.errorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+
+	// Rediriger vers la page d'accueil
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 
@@ -146,6 +172,7 @@ func main() {
 
 	// On utilise app.homeHandler au lieu de homeHandler
 	http.HandleFunc("/", app.homeHandler)
+	http.HandleFunc("/add", app.addTodoHandler)
 
 	// Fichiers statiques
 	fs := http.FileServer(http.Dir("static"))
