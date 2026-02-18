@@ -60,6 +60,7 @@ func (app *Env) initDB() error {
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
 		completed BOOLEAN DEFAULT FALSE,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);`
 
 	// Exécution de la requête
@@ -140,7 +141,7 @@ func (app *Env) doneTodoHandler(w http.ResponseWriter, r *http.Request) {
 
 	// On récupère l'ID de la tâche à modifier
 	id := r.FormValue("id")
-	
+
 	// On met à jour la tâche dans la BDD (on passe completed à true)
 	// On utilise "NOT completed" pour pouvoir cocher/décocher avec le même bouton
 	query := "UPDATE todos SET completed = NOT completed WHERE id = ?"
