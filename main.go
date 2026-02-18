@@ -156,6 +156,34 @@ func (app *Env) doneTodoHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func (app *Env) renameTodoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		app.errorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.FormValue("id")
+
+	// Récupérer le nouveau titre depuis le formulaire
+	newTitle := r.FormValue("new_title")
+	if newTitle == "" {
+		app.errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	// Mettre à jour le titre de la tâche dans la BDD
+	query := "UPDATE todos SET title = ? WHERE id = ?"
+	_, err := app.db.Exec(query, newTitle, id)
+	if err != nil {
+		log.Println("Erreur lors du renommage :", err)
+		app.errorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+	
+	// Rediriger vers la page d'accueil après le renommage
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (app *Env) deleteTodoHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		app.errorHandler(w, r, http.StatusMethodNotAllowed)
@@ -216,6 +244,7 @@ func main() {
 	http.HandleFunc("/", app.homeHandler)
 	http.HandleFunc("/add", app.addTodoHandler)
 	http.HandleFunc("/done", app.doneTodoHandler)
+	http.HandleFunc("/rename", app.renameTodoHandler)
 	http.HandleFunc("/delete", app.deleteTodoHandler)
 
 	// Fichiers statiques
