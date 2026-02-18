@@ -205,6 +205,28 @@ button:hover {
         0 0 8px #47ffa3,
         0 0 16px rgba(71, 255, 163, 0.4);
 
+}.btn-rename {
+
+    background: transparent;
+    border: 1px solid #47ffa3;
+    color: #47ffa3;
+
+    border-radius: 8px;
+    padding: 5px 12px;
+
+    cursor: pointer;
+    transition: 0.3s;
+
+    box-shadow: none;
+
+}
+
+.btn-rename:hover {
+
+    box-shadow:
+        0 0 8px #47ffa3,
+        0 0 16px rgba(71, 255, 163, 0.4);
+
 }
 
 .btn-delete {
