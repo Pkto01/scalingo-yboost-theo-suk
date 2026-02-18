@@ -130,13 +130,19 @@ button:hover {
 /* BOUTON DONE */
 
 .btn-done {
+
     background: transparent;
     border: 1px solid cyan;
     color: cyan;
+
     border-radius: 8px;
     padding: 5px 12px;
+
     cursor: pointer;
     transition: 0.3s;
+
+    box-shadow: none;
+
 }
 
 /* DONE ACTIF */
@@ -149,42 +155,38 @@ button:hover {
 
 /* HOVER */
 
+
 .btn-done:hover {
+
     box-shadow:
-        0 0 15px cyan;
+        0 0 8px cyan,
+        0 0 16px rgba(0, 255, 255, 0.4);
+
 }
 
-/* BOUTON DELETE NEON */
-
 .btn-delete {
+
     background: transparent;
     border: 1px solid #ff2b2b;
     color: #ff2b2b;
+
     border-radius: 8px;
     padding: 5px 12px;
+
     cursor: pointer;
-    font-size: 1rem;
-    transition: 0.25s;
-    box-shadow:
-        0 0 5px #ff2b2b,
-        inset 0 0 5px rgba(255,43,43,0.2);
+    transition: 0.3s;
+
+    box-shadow: none;
+
 }
-
-
-/* HOVER */
 
 .btn-delete:hover {
-    color: white;
-    background: #ff2b2b;
+
     box-shadow:
-        0 0 5px #ff2b2b,
-        0 0 15px #ff2b2b,
-        0 0 30px #ff2b2b,
-        0 0 60px #ff0000;
-    transform: scale(1.15);
+        0 0 8px #ff2b2b,
+        0 0 16px rgba(255, 43, 43, 0.4);
+
 }
-
-
 /* ANIMATIONS */
 
 @keyframes float {
