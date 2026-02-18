@@ -45,6 +45,26 @@ func connectDB() (*sql.DB, error) {
 	return db, nil
 }
 
+func (app *Env) initDB() error {
+	// Requête SQL pour créer la table des tâches
+	query := `
+	CREATE TABLE IF NOT EXISTS todos (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		title VARCHAR(255) NOT NULL,
+		completed BOOLEAN DEFAULT FALSE,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	// Exécution de la requête
+	_, err := app.db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Base de données initialisée (Table 'todos' prête)")
+	return nil
+}
+
 // 2. homeHandler devient une MÉTHODE de Env
 func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -67,7 +87,6 @@ func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 // 3. errorHandler devient aussi une méthode de Env
 func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
-	// Attention : vérifie bien si ton dossier s'appelle "static" ou "template"
 	tmpl, err := template.ParseFiles("static/error.html") 
 	if err != nil {
 		log.Println("Erreur template error.html:", err)
@@ -86,17 +105,22 @@ func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int)
 }
 
 func main() {
-	// A. Connexion BDD
+	// Connexion BDD
 	db, err := connectDB()
 	if err != nil {
 		log.Fatal("Impossible de se connecter à la BDD :", err)
 	}
 	defer db.Close()
 
-	// B. On initialise notre structure avec la connexion
+	// On initialise notre structure avec la connexion
 	app := &Env{db: db}
 
-	// C. On utilise app.homeHandler au lieu de homeHandler
+	err = app.initDB()
+	if err != nil {
+		log.Fatal("Erreur lors de l'initialisation des tables :", err)
+	}
+
+	// On utilise app.homeHandler au lieu de homeHandler
 	http.HandleFunc("/", app.homeHandler)
 
 	// Fichiers statiques
