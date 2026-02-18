@@ -45,7 +45,6 @@
     function handleRename(id, currentTitle) {
         const newTitle = prompt("Renommez la tâche :", currentTitle);
         if (newTitle && newTitle.trim() !== "") {
-            // Créer un formulaire dynamique pour soumettre la nouvelle valeur
             const form = document.createElement("form");
             form.method = "POST";
             form.action = "/rename";
@@ -58,7 +57,7 @@
 
             const titleInput = document.createElement("input");
             titleInput.type = "hidden";
-            titleInput.name = "title";
+            titleInput.name = "new_title"; // <-- CHANGÉ ICI (au lieu de "title")
             titleInput.value = newTitle.trim();
             form.appendChild(titleInput);
 
@@ -67,6 +66,4 @@
         }
     }
 </script>
-
-
 </html>
