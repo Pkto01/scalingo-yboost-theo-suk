@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -108,10 +109,11 @@ func (app *Env) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
+
 	tmpl, err := template.ParseFiles("static/error.html")
 	if err != nil {
-		log.Println("Erreur template error.html:", err)
-		http.Error(w, http.StatusText(status), status)
+		log.Println("ATTENTION: static/error.html introuvable:", err)
+		fmt.Fprintf(w, "<h1>Erreur %d</h1><p>%s</p>", status, http.StatusText(status))
 		return
 	}
 
@@ -122,6 +124,7 @@ func (app *Env) errorHandler(w http.ResponseWriter, r *http.Request, status int)
 		Status:  status,
 		Message: http.StatusText(status),
 	}
+
 	tmpl.Execute(w, data)
 }
 
