@@ -40,8 +40,7 @@ h1 {
     letter-spacing: 4px;
 }
 
-h1::before,
-h1::after {
+h1::before,{
     content: attr(data-text);
     position: absolute;
     left: 0;
@@ -52,12 +51,6 @@ h1::before {
     color: cyan;
     z-index: -1;
     animation: glitch 2s infinite linear alternate-reverse;
-}
-
-h1::after {
-    color: magenta;
-    z-index: -2;
-    animation: glitch 1.5s infinite linear alternate;
 }
 
 /* TEXTE */
