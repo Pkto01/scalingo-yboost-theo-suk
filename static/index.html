@@ -21,15 +21,17 @@
             <li class="{{ if .Completed }}completed{{ end }}">
                 <div>
                     <span>{{ .Title }}</span>
-                    <form action="/done" method="POST" style="display:inline;">
-                        <input type="hidden" name="id" value="{{ .ID }}">
-                        <button type="submit" class="btn-done">✓</button>
-                    </form>
-                    <button type="button" class="btn-rename" onclick="handleRename('{{ .ID }}', '{{ .Title }}')">✎</button>
-                    <form action="/delete" method="POST" style="display:inline;">
-                        <input type="hidden" name="id" value="{{ .ID }}">
-                        <button type="submit" class="btn-delete">✗</button>
-                    </form>
+                    <div class="group-button">
+                        <form action="/done" method="POST" style="display:inline;">
+                            <input type="hidden" name="id" value="{{ .ID }}">
+                            <button type="submit" class="btn-done">✓</button>
+                        </form>
+                        <button type="button" class="btn-rename" onclick="handleRename('{{ .ID }}', '{{ .Title }}')">✎</button>
+                        <form action="/delete" method="POST" style="display:inline;">
+                            <input type="hidden" name="id" value="{{ .ID }}">
+                            <button type="submit" class="btn-delete">✗</button>
+                        </form>
+                    </div>
                 </div>
             </li>
             {{ else }}
