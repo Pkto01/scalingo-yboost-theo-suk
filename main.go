@@ -122,6 +122,8 @@ func (app *Env) addTodoHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		app.errorHandler(w, r, http.StatusInternalServerError)
 		return
+	} else {
+		log.Printf("Nouvelle tâche ajoutée : %s\n", title)
 	}
 
 	// Rediriger vers la page d'accueil
@@ -145,6 +147,8 @@ func (app *Env) doneTodoHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Erreur lors de l'update :", err)
 		app.errorHandler(w, r, http.StatusInternalServerError)
 		return
+	} else {
+		log.Printf("Tâche %s marquée comme terminée/non terminée\n", id)
 	}
 
 	// Redirection vers l'accueil pour voir le changement
@@ -173,6 +177,8 @@ func (app *Env) renameTodoHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Erreur lors du renommage :", err)
 		app.errorHandler(w, r, http.StatusInternalServerError)
 		return
+	} else {
+		log.Println("Tâche", id, "renommée en", newTitle)
 	}
 	
 	// Rediriger vers la page d'accueil après le renommage
@@ -193,6 +199,8 @@ func (app *Env) deleteTodoHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Erreur lors de la suppression :", err)
 		app.errorHandler(w, r, http.StatusInternalServerError)
 		return
+	} else {
+		log.Println("Tâche", id, "supprimée")
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -224,6 +232,8 @@ func main() {
 	db, err := connectDB()
 	if err != nil {
 		log.Fatal("Impossible de se connecter à la BDD :", err)
+	} else {
+		log.Println("Connexion à la base de données réussie")
 	}
 	defer db.Close()
 
